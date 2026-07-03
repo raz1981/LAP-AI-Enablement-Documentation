@@ -1,0 +1,74 @@
+[
+  {
+    "slug": "home",
+    "title": "Home",
+    "file": "docs/home.md",
+    "keywords": "home overview start"
+  },
+  {
+    "slug": "introduction",
+    "title": "Introduction",
+    "file": "docs/introduction.md",
+    "keywords": "intro purpose scope"
+  },
+  {
+    "slug": "getting-started",
+    "title": "Getting Started",
+    "file": "docs/getting-started.md",
+    "keywords": "quickstart onboarding"
+  },
+  {
+    "slug": "installation",
+    "title": "Installation",
+    "file": "docs/installation.md",
+    "keywords": "setup install prerequisites"
+  },
+  {
+    "slug": "configuration",
+    "title": "Configuration",
+    "file": "docs/configuration.md",
+    "keywords": "settings env"
+  },
+  {
+    "slug": "features",
+    "title": "Features",
+    "file": "docs/features.md",
+    "keywords": "capabilities modules"
+  },
+  {
+    "slug": "api-reference",
+    "title": "API Reference",
+    "file": "docs/api-reference.md",
+    "keywords": "api endpoints schemas"
+  },
+  {
+    "slug": "examples",
+    "title": "Examples",
+    "file": "docs/examples.md",
+    "keywords": "samples demos"
+  },
+  {
+    "slug": "faq",
+    "title": "FAQ",
+    "file": "docs/faq.md",
+    "keywords": "questions answers"
+  },
+  {
+    "slug": "troubleshooting",
+    "title": "Troubleshooting",
+    "file": "docs/troubleshooting.md",
+    "keywords": "errors fixes debug"
+  },
+  {
+    "slug": "changelog",
+    "title": "Changelog",
+    "file": "docs/changelog.md",
+    "keywords": "release notes versions"
+  },
+  {
+    "slug": "contact",
+    "title": "Contact",
+    "file": "docs/contact.md",
+    "keywords": "support help contact"
+  }
+]

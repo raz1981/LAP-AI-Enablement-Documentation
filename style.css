@@ -320,6 +320,11 @@ a:focus-visible {
   margin-bottom: 0.58rem;
 }
 
+.doc-section h1 {
+  font-size: clamp(1.45rem, 1.35rem + 0.55vw, 1.95rem);
+  margin-bottom: 0.58rem;
+}
+
 .doc-section p {
   margin: 0 0 0.9rem;
   color: color-mix(in srgb, var(--text) 86%, var(--muted));
@@ -339,6 +344,49 @@ a:focus-visible {
 
 .doc-section li {
   margin-bottom: 0.35rem;
+}
+
+.doc-section pre {
+  margin: 0 0 0.9rem;
+  padding: 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-soft) 88%, black 12%);
+  overflow: auto;
+}
+
+.doc-section code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.95em;
+  background: color-mix(in srgb, var(--surface-soft) 85%, var(--primary) 15%);
+  border-radius: 6px;
+  padding: 0.05rem 0.28rem;
+}
+
+.doc-section pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.doc-section blockquote {
+  margin: 0 0 0.9rem;
+  border-left: 3px solid var(--primary);
+  padding: 0.45rem 0.8rem;
+  background: var(--surface-soft);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.doc-section table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 0.9rem;
+}
+
+.doc-section th,
+.doc-section td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.62rem;
+  text-align: left;
 }
 
 .doc-section h3 {

@@ -8,11 +8,15 @@ const themeToggle = document.getElementById("themeToggle");
 const currentBreadcrumb = document.getElementById("currentBreadcrumb");
 const tocCard = document.getElementById("tocCard");
 const tocList = document.getElementById("tocList");
+const navList = document.getElementById("navList");
+const docContent = document.getElementById("docContent");
 
-const navLinks = Array.from(document.querySelectorAll(".nav-link"));
+let navLinks = [];
 const revealElements = Array.from(document.querySelectorAll(".reveal"));
 
 const STORAGE_KEY = "lap-docs-theme";
+const PAGES_MANIFEST = "docs/pages.json";
+const SITE_NAME = "LAP-AI Enablement Documentation";
 
 function setTheme(theme) {
   htmlRoot.setAttribute("data-theme", theme);
@@ -29,22 +33,21 @@ function getPreferredTheme() {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-function normalizePath(pathname) {
-  const clean = pathname.split("/").pop() || "index.html";
-  return clean.toLowerCase() || "index.html";
+function getCurrentSlug() {
+  const params = new URLSearchParams(window.location.search);
+  return (params.get("page") || "home").trim().toLowerCase();
 }
 
-function updateActiveNavByPath() {
-  const currentPage = normalizePath(window.location.pathname);
-
+function updateActiveNavBySlug(slug, title) {
   navLinks.forEach((link) => {
-    const linkPage = normalizePath(link.getAttribute("href") || "");
-    const isActive = currentPage === linkPage;
+    const isActive = link.dataset.slug === slug;
     link.classList.toggle("active", isActive);
-    if (isActive) {
-      currentBreadcrumb.textContent = link.textContent.trim();
-    }
   });
+
+  if (title) {
+    currentBreadcrumb.textContent = title;
+    document.title = `${title} | ${SITE_NAME}`;
+  }
 }
 
 function closeMobileMenu() {
@@ -97,13 +100,6 @@ function setupMenuToggle() {
     }
   });
 
-  navLinks.forEach((link) => {
-    link.addEventListener("click", () => {
-      if (window.innerWidth <= 900) {
-        closeMobileMenu();
-      }
-    });
-  });
 }
 
 function setupSearch() {
@@ -168,12 +164,14 @@ function addHeadingAnchor(heading) {
 }
 
 function buildTableOfContents() {
-  const article = document.querySelector(".doc-article");
-  if (!article || !tocCard || !tocList) {
+  if (!docContent || !tocCard || !tocList) {
     return;
   }
 
-  const headings = Array.from(article.querySelectorAll("h2, h3"));
+  tocList.innerHTML = "";
+  tocCard.hidden = false;
+
+  const headings = Array.from(docContent.querySelectorAll("h1, h2, h3"));
   if (headings.length <= 1) {
     tocCard.hidden = true;
     return;
@@ -248,10 +246,114 @@ function setupHashScroll() {
   }
 }
 
+function renderMarkdown(markdown) {
+  if (window.marked) {
+    return window.marked.parse(markdown);
+  }
+
+  const escaped = markdown
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br>");
+  return `<p>${escaped}</p>`;
+}
+
+function buildNavigation(pages, activeSlug) {
+  navList.innerHTML = "";
+
+  pages.forEach((page) => {
+    const li = document.createElement("li");
+    const link = document.createElement("a");
+    link.className = "nav-link";
+    link.href = `index.html?page=${encodeURIComponent(page.slug)}`;
+    link.textContent = page.title;
+    link.dataset.slug = page.slug;
+    link.dataset.keywords = page.keywords || "";
+
+    link.addEventListener("click", () => {
+      if (window.innerWidth <= 900) {
+        closeMobileMenu();
+      }
+    });
+
+    li.append(link);
+    navList.append(li);
+  });
+
+  navLinks = Array.from(document.querySelectorAll(".nav-link"));
+  setupSearch();
+
+  const activePage = pages.find((page) => page.slug === activeSlug) || pages[0];
+  updateActiveNavBySlug(activePage.slug, activePage.title);
+}
+
+async function loadManifest() {
+  const manifestCandidates = [PAGES_MANIFEST, `./${PAGES_MANIFEST}`];
+  let response = null;
+
+  for (const path of manifestCandidates) {
+    // Try a couple of relative manifest paths for different hosting contexts.
+    response = await fetch(path, { cache: "no-store" }).catch(() => null);
+    if (response && response.ok) {
+      break;
+    }
+  }
+
+  if (!response || !response.ok) {
+    throw new Error("Unable to load pages manifest (docs/pages.json).");
+  }
+
+  const pages = await response.json();
+  if (!Array.isArray(pages) || pages.length === 0) {
+    throw new Error("Pages manifest is empty or invalid.");
+  }
+
+  return pages;
+}
+
+async function loadPageContent(page) {
+  const response = await fetch(page.file, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Unable to load markdown file: ${page.file}`);
+  }
+
+  const markdown = await response.text();
+  docContent.innerHTML = renderMarkdown(markdown);
+  updateActiveNavBySlug(page.slug, page.title);
+  buildTableOfContents();
+  setupHashScroll();
+}
+
+async function initializeDocs() {
+  try {
+    if (window.location.protocol === "file:") {
+      throw new Error(
+        "This site cannot load markdown over file://. Start a local web server and open http://localhost:8000/index.html?page=home"
+      );
+    }
+
+    const pages = await loadManifest();
+    const slug = getCurrentSlug();
+    const activePage = pages.find((page) => page.slug === slug) || pages[0];
+
+    buildNavigation(pages, activePage.slug);
+    await loadPageContent(activePage);
+  } catch (error) {
+    docContent.innerHTML = `
+      <h2>Content Unavailable</h2>
+      <p>Unable to load documentation content from Markdown files.</p>
+      <p>${error.message}</p>
+      <h3>Quick Fix</h3>
+      <p>Run a local server from the repository root:</p>
+      <pre><code>python -m http.server 8000</code></pre>
+      <p>Then open <code>http://localhost:8000/index.html?page=home</code>.</p>
+    `;
+    tocCard.hidden = true;
+  }
+}
+
 setupThemeToggle();
 setupMenuToggle();
-setupSearch();
 setupRevealObserver();
-updateActiveNavByPath();
-buildTableOfContents();
-setupHashScroll();
+initializeDocs();
