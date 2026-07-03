@@ -1,2 +1,2 @@
-# LAP-AI-Enablement-Documentation-
+# LAP-AI Enablement Documentation
 A repository to host documentation on how to use existing AI Toolkits, Agents, Skills and any other AI-based Tools such as PII Scanner etc...
